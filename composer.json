@@ -1,0 +1,27 @@
+{
+	"name": "mysutka/product_feed_generator",
+	"type": "library",
+	"description": "Class helping to generate product feed for various price comparison services",
+	"keywords": ["product", "feed", "generator", "xml", "csv", "price_comparison_services"],
+	"homepage": "https://github.com/mysutka/datalayer_generator",
+	"license": ["MIT"],
+	"authors": [
+		{
+			"name": "Michal Vojan",
+			"homepage": "https://github.com/mysutka"
+		}
+	],
+	"require": {
+		"php": ">=5.3.0"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "~6"
+	},
+	"autoload": {
+		"classmap": ["src"],
+		"files": ["src/load.php"]
+	},
+	"autoload-dev": {
+		"classmap": ["src", "test"]
+	}
+}
