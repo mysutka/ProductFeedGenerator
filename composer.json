@@ -1,8 +1,8 @@
 {
 	"name": "mysutka/product_feed_generator",
 	"type": "library",
-	"description": "Class helping to generate product feed for various price comparison services",
-	"keywords": ["product", "feed", "generator", "xml", "csv", "price_comparison_services"],
+	"description": "Class helping to generate product feed for various price comparison services suitable for Atk14 applications",
+	"keywords": ["product", "feed", "generator", "xml", "csv", "price_comparison_services", "atk14"],
 	"homepage": "https://github.com/mysutka/datalayer_generator",
 	"license": ["MIT"],
 	"authors": [
