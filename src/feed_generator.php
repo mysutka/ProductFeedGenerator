@@ -30,7 +30,7 @@ class FeedGenerator {
 			"fixed_values" => [],
 
 			# reader options
-			"price_with_currency" => false,
+#			"price_with_currency" => false,
 			"hostname" => null,
 #			"price_finder" => null, 
 #			"lang" => null,

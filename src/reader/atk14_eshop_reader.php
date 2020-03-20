@@ -28,6 +28,7 @@ class Atk14EshopReader {
 		$_default_price_finder = $this->_getDefaultPriceFinder($_price_finder_options);
 
 		$options += [
+			"price_with_currency" => false,
 			"price_finder" => $_default_price_finder,
 			"lang" => null,
 			"category_path_connector" => ">",
