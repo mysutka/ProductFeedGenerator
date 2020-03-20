@@ -57,11 +57,11 @@ class Atk14EshopReader {
 			deleted='f' AND
 			visible='t'
 			ORDER BY id
-			LIMIT :limit OFFSET :offset", array(
+			LIMIT :limit OFFSET :offset", [
 				":offset" => $options["offset"],
 				":limit" => $options["limit"],
 				":exclude_tag_id" => $options["exclude_tag"],
-			));
+			]);
 		return $ids;
 	}
 

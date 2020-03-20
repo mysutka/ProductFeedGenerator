@@ -11,15 +11,15 @@ class ProductFeedGeneratorRobot extends ApplicationRobot {
 
 		# Create XML product feed for Heureka.cz price comparator
 		$generator = new \ProductFeedGenerator\Generator\HeurekaCzGenerator($reader, [
-				"logger" => $this->logger,
+			"logger" => $this->logger,
 		]);
 		$generator->exportTo($ATK14_GLOBAL->getPublicRoot()."/product_feeds/heureka_cz.xml");
 
 		# Create XML product feed for Google Shopping price comparator
 		# As we want the feed to contain prices in EUR, we will use specific PriceFinder
 		$generator = new \ProductFeedGenerator\Generator\GoogleShoppingGenerator($reader, [
-				"logger" => $this->logger,
-				"price_finder" => $this->_getPriceFinder(["currency" => "EUR"]),
+			"logger" => $this->logger,
+			"price_finder" => $this->_getPriceFinder(["currency" => "EUR"]),
 		]);
 		$generator->exportTo($ATK14_GLOBAL->getPublicRoot()."/product_feeds/google_shopping.xml");
 
