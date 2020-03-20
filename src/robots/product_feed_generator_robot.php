@@ -37,11 +37,11 @@ class ProductFeedGeneratorRobot extends ApplicationRobot {
 		# - eshop_url - url of the site
 		# - feed_title - short description of the eshop. some price comparators use it, some don't.
 		$generator = new \ProductFeedGenerator\Generator\GoogleShoppingGenerator($reader, [
-				"logger" => $this->logger,
-				"lang" => "sk",
-				"feed_title" => "Nabytek culek - sk feed",
-				"hostname" => "www.nabytokculok.sk",
-				"eshop_url" => "www.nabytok-culek.sk",
+			"logger" => $this->logger,
+			"lang" => "sk",
+			"feed_title" => "ukážkový obchod",
+			"hostname" => "ukazkovy-eshop.sk.gibona.com",
+			"eshop_url" => "ukazkovy-eshop.gibona.com",
 		]);
 		$generator->exportTo($ATK14_GLOBAL->getPublicRoot()."/product_feeds/google_shopping_sk.xml");
 
