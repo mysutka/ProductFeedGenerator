@@ -18,16 +18,53 @@ class Atk14EshopReader {
 	const ELEMENT_KEY_BASEPRICE_VAT = "BASEPRICE_VAT";
 	const ELEMENT_KEY_SALEPRICE_VAT = "PRICE_VAT";
 
-	function __construct($options=[]) {
-		$_price_finder_options = array(
-			"currency" => null,
-		);
+	function __construct($constructor_options=[]) {
+		$this->markdown = $this->_getMarkdown();
+		$this->dbmole = \PgMole::GetInstance();
+
+		$this->buildDefaultOptions();
+		$this->generator_options = [];
+		$this->constructor_options = $constructor_options;
+		$this->live_options = [];
+		$this->setOptions();
+	}
+
+
+	function setGeneratorOptions($generator_options=[]) {
+		$this->generator_options = $generator_options;
+		$this->setOptions( );
+	}
+
+	/**
+	 * Options muzou prijit z ruznych mist.
+	 * Uvazuji se v poradi:
+	 * - vychozi options platne pro Atk14EshopReader
+	 * - options prichazejici z generatoru
+	 * - options prichazejici z konstruktoru Atk14EshopReader
+	 * - options predane v setOptions
+	 *
+	 * @toto tak toto poradne otestovat!!!
+	 */
+	function setOptions($options=[]) {
+		$this->live_options = array_merge($this->live_options, $options);
+
+		$options = array_merge( $this->default_options, $this->generator_options, $this->constructor_options, $this->live_options);
+
+		$this->lang = $options["lang"];
+		$this->price_finder = $options["price_finder"];
+
+		$this->options = $options;
+	}
+
+	function buildDefaultOptions($options=[]) {
+
+		$_price_finder_options = [];
 		if (isset($options["currency"])) {
 			$_price_finder_options["currency"] = $options["currency"];
 		}
 		$_default_price_finder = $this->_getDefaultPriceFinder($_price_finder_options);
 
-		$options += [
+		$this->default_options = [
 			"price_with_currency" => false,
 			"price_finder" => $_default_price_finder,
 			"lang" => null,
@@ -36,13 +73,6 @@ class Atk14EshopReader {
 			"image_geometry" => "800x800",
 			"image_watermark" => null,
 		];
-
-		$this->dbmole = \PgMole::GetInstance();
-		$this->lang = $options["lang"];
-		$this->price_finder = $options["price_finder"];
-		$this->markdown = $this->_getMarkdown();
-
-		$this->options = $options;
 	}
 
 	function getObjectIds($options=[]) {

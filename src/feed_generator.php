@@ -48,6 +48,7 @@ class FeedGenerator {
 			] + $options;
 			$this->reader = new \ProductFeedGenerator\Reader\Atk14EshopReader($_reader_options);
 		}
+		$this->reader->setGeneratorOptions($this->options);
 	}
 
 	function exportTo($output_filename, $options=[]) {
