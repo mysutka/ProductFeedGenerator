@@ -56,7 +56,7 @@ class Atk14EshopReader {
 		$this->options = $options;
 	}
 
-	function buildDefaultOptions($options=[]) {
+	protected function buildDefaultOptions($options=[]) {
 
 		$_price_finder_options = [];
 		if (isset($options["currency"])) {

@@ -30,13 +30,7 @@ class FeedGenerator {
 			"fixed_values" => [],
 
 			# reader options
-#			"price_with_currency" => false,
 			"hostname" => null,
-#			"price_finder" => null, 
-#			"lang" => null,
-#			"category_path_connector" => ">",
-#			"image_geometry" => "800x800",
-#			"image_watermark" => null,
 		];
 
 		$this->logger = $options["logger"];
@@ -108,6 +102,15 @@ class FeedGenerator {
 				# @todo bude stacit, kdyz je tam nacpeme skrz $options
 				array_walk($itemAr, function(&$item) use ($fixed_values) {
 					$item = $fixed_values + $item;
+					return $item;
+				});
+
+				$null_keys = array_keys(array_filter($fixed_values, "is_null"));
+				# keys in fixed_values containing value null will be removed from output
+				array_walk($itemAr, function(&$item) use ($null_keys) {
+					foreach($null_keys as $k) {
+						unset($item[$k]);
+					}
 					return $item;
 				});
 
