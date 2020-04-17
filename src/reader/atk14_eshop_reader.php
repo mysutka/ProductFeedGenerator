@@ -18,6 +18,9 @@ class Atk14EshopReader {
 	const ELEMENT_KEY_BASEPRICE_VAT = "BASEPRICE_VAT";
 	const ELEMENT_KEY_SALEPRICE_VAT = "PRICE_VAT";
 
+	const ELEMENT_KEY_UNIT = "UNIT";
+	const ELEMENT_KEY_UNIT_PRICING_BASE_MEASURE = "UNIT_PRICING_BASE_MEASURE";
+
 	function __construct($constructor_options=[]) {
 		$this->markdown = $this->_getMarkdown();
 		$this->dbmole = \PgMole::GetInstance();
@@ -155,13 +158,14 @@ class Atk14EshopReader {
 	 */
 	function itemToArray($product) {
 		$_image = $product->getImage();
+		$_unit = $product->getUnit();
 
 		$item_attrs = array();
 
-		$amount = 1;
-		$_unit = $product->getUnit()->getUnit();
-		($_unit=="cm") && ($amount=100);
-		$_product_price = $this->price_finder->getPrice($product, $amount);
+		$item_attrs[static::ELEMENT_KEY_UNIT] = $_unit->getUnit();
+		$item_attrs[static::ELEMENT_KEY_UNIT_PRICING_BASE_MEASURE] = sprintf("%s %s", "1", $_unit->getDisplayUnit());
+
+		$_product_price = $this->price_finder->getPrice($product, $_unit->getDisplayUnitMultiplier());
 
 		$product_name = $product->getName($this->lang);
 		$product_ean = $product->hasKey("ean") ? $product->g("ean") : null;

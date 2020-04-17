@@ -15,7 +15,7 @@ class FeedGenerator {
 		$this->reader = $reader;
 
 		$service_class = get_class($this);
-		$service_name = preg_match("/\\\([a-zA-Z0-9]+)Generator$/", $service_class, $matches);
+		$service_name = preg_match("/([a-zA-Z0-9]+)Generator$/", $service_class, $matches);
 		$service_name = new \String4($matches[1]);
 		$this->service_name = $service_name->underscore();
 
