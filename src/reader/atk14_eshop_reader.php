@@ -20,6 +20,7 @@ class Atk14EshopReader {
 
 	const ELEMENT_KEY_UNIT = "UNIT";
 	const ELEMENT_KEY_UNIT_PRICING_BASE_MEASURE = "UNIT_PRICING_BASE_MEASURE";
+	const ELEMENT_KEY_STOCKCOUNT = "STOCKCOUNT";
 
 	function __construct($constructor_options=[]) {
 		$this->markdown = $this->_getMarkdown();
@@ -164,6 +165,7 @@ class Atk14EshopReader {
 
 		$item_attrs[static::ELEMENT_KEY_UNIT] = $_unit->getUnit();
 		$item_attrs[static::ELEMENT_KEY_UNIT_PRICING_BASE_MEASURE] = sprintf("%s %s", "1", $_unit->getDisplayUnit());
+		$item_attrs[static::ELEMENT_KEY_STOCKCOUNT] = $product->getStockcount();
 
 		$_product_price = $this->price_finder->getPrice($product, $_unit->getDisplayUnitMultiplier());
 

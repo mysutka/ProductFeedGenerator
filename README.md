@@ -91,3 +91,24 @@ class LimitedEshopReader extends ProductFeedGenerator\Reader\Atk14EshopReader {
   }
 }
 ```
+
+## Custom Generator
+
+Sometimes happenes that we need to send the comparison service a value that is a bit altered while the generator provides it as it is stored in the database. So let's create our custom Generator.
+Let's say our standard GoogleShoppingGenerator does not provide "g:availability" attribute (which in actually does) but there is attribute STOCKCOUNT provided by the main `Atk14EshopReader` class. So we create new Generator class which adds the STOCKCOUNT attribute to the values from the Reader class and then adds the "g:availability" attribute to the output.
+```php
+class CustomGoogleShoppingGenerator extends ProductFeedGenerator\Generator\GoogleShoppingGenerator {
+  function getAttributesMap() {
+    return parent::getAttributesMap() + [
+      "g:availability" => "STOCKCOUNT",
+    ];
+  }
+
+  function afterFilter($values) {
+    $values["g:availability"] = ($values["g:availability"]) > 0 ? "in stock" : "out of stock";
+    return $values;
+  }
+}
+```
+The method `getAttributesMap()` is called in the parent Generator class. Here, we override it and add the `g:availability` attribute by using the general `STOCKCOUNT` attribute provided by the Reader class which is simply a number of products in our warehouse.
+Then we add the `afterFilter()` method which is also called by the parent class FeedGenerator. It is used to transform the values which would be normally sent to final output. In our method we modify the `g:availability` attribute to our needs, which means we send a text "in stock" or "out of stock" to the output instead of exact number.
