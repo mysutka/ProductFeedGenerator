@@ -17,11 +17,11 @@ class GoogleMerchantsGenerator extends FeedGenerator {
 	function getAttributesMap() {
 		return [
 			"ID" => "ITEM_ID",
-			"Item_description" => "DESCRIPTION",
-			"Image_URL" => "IMGURL",
-			"Item_category" => "CATEGORYTEXT",
-			"Final_URL" => "URL",
-			"Item_title" => "PRODUCTNAME",
+			"Item description" => "DESCRIPTION",
+			"Image URL" => "IMGURL",
+			"Item category" => "CATEGORYTEXT",
+			"Final URL" => "URL",
+			"Item title" => "PRODUCTNAME",
 			"Price" => "PRICE_VAT",
 		];
 	}
