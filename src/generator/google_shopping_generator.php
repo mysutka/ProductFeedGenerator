@@ -17,7 +17,6 @@ class GoogleShoppingGenerator extends FeedGenerator {
 			"feed_end" => '</feed>',
 			"fixed_values" => [
 				"g:condition" => "new",
-				"g:availability" => "in stock",
 			],
 		];
 		return parent::__construct($reader, $options);
@@ -34,12 +33,13 @@ class GoogleShoppingGenerator extends FeedGenerator {
 			"title" => "PRODUCTNAME",
 			"link" => "URL",
 			"g:brand" => "MANUFACTURER",
+			"g:availability" => "STOCKCOUNT",
 
 			"g:price" => "BASEPRICE_VAT",
 			"g:sale_price" => "PRICE_VAT",
-			"g:sale_price_effective_date" => "SALEPRICE_EFFECTIVE_DATE",
 
-			"g:availability" => "STOCKCOUNT",
+			"SALE_PRICE_START_DATE" => "SALE_PRICE_START_DATE",
+			"SALE_PRICE_END_DATE" => "SALE_PRICE_END_DATE",
 		];
 	}
 
@@ -47,7 +47,7 @@ class GoogleShoppingGenerator extends FeedGenerator {
 		if ($values["g:price"] == $values["g:sale_price"]) {
 			unset($values["g:sale_price"]);
 		}
-		$values["g:availability"] = ($values["g:availability"]) > 0 ? "in stock" : "out of stock";
+		$values["g:availability"] = ($values["g:availability"] > 0) ? "in stock" : "out of stock";
 		$ids = [
 			(isset($values["g:gtin"]) ? $values["g:gtin"] : null),
 			$mpn = null,
@@ -56,6 +56,16 @@ class GoogleShoppingGenerator extends FeedGenerator {
 		if (count(array_filter($ids))<2) {
 			$values["g:identifier_exists"] = "no";
 		}
+		$sale_price_dates = [
+			isset($values["SALE_PRICE_START_DATE"]) ? date("c", strtotime($values["SALE_PRICE_START_DATE"])) : null,
+			isset($values["SALE_PRICE_END_DATE"]) ? date("c", strtotime($values["SALE_PRICE_END_DATE"])) : null,
+		];
+		# potrebujeme mit oba datumy, abychom platnost dali do feedu
+		if (sizeof(array_filter($sale_price_dates)) === 2) {
+			$values["g:sale_price_effective_date"] = join("/", $sale_price_dates);
+		}
+		unset($values["SALE_PRICE_START_DATE"]);
+		unset($values["SALE_PRICE_END_DATE"]);
 		return $values;
 	}
 }

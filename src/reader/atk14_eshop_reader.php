@@ -22,6 +22,10 @@ class Atk14EshopReader {
 	const ELEMENT_KEY_UNIT_PRICING_BASE_MEASURE = "UNIT_PRICING_BASE_MEASURE";
 	const ELEMENT_KEY_STOCKCOUNT = "STOCKCOUNT";
 
+	const ELEMENT_KEY_SALE_PRICE_START_DATE = "SALE_PRICE_START_DATE";
+	const ELEMENT_KEY_SALE_PRICE_END_DATE = "SALE_PRICE_END_DATE";
+	const ELEMENT_KEY_PRICE_IS_DISCOUNTED = "PRICE_IS_DISCOUNTED";
+
 	function __construct($constructor_options=[]) {
 		$this->markdown = $this->_getMarkdown();
 		$this->dbmole = \PgMole::GetInstance();
@@ -148,6 +152,36 @@ class Atk14EshopReader {
 		return $categories;
 	}
 
+	protected function prepareProductPriceData(\Product $object, &$item_data) {
+		$_unit = $object->getUnit();
+		$_currency = $this->price_finder->getCurrency();
+
+		$_product_price = $this->price_finder->getPrice($object, (int)$_unit->getDisplayUnitMultiplier());
+
+		$_price_with_currency = $this->options["price_with_currency"];
+
+		# zakladni cena pred slevou
+		$_product_price && ($item_data[static::ELEMENT_KEY_BASEPRICE_VAT] = number_format(round($_product_price->getPriceBeforeDiscountInclVat(),$_currency->getDecimalsSummary()),$_currency->getDecimalsSummary(),".",""));
+		$_product_price && ($_price_with_currency===true) && ($item_data[static::ELEMENT_KEY_BASEPRICE_VAT] .= sprintf(" %s",$_currency->getCode()));
+
+		# aktualni, konecna cena
+		$_product_price && ($item_data[static::ELEMENT_KEY_SALEPRICE_VAT] = number_format(round($_product_price->getPriceInclVat(),$_currency->getDecimalsSummary()),$_currency->getDecimalsSummary(),".",""));
+		$_product_price && ($_price_with_currency===true) && ($item_data[static::ELEMENT_KEY_SALEPRICE_VAT] .= sprintf(" %s",$_currency->getCode()));
+
+		$item_data[static::ELEMENT_KEY_PRICE_IS_DISCOUNTED] = $_product_price->discounted();
+		$item_data[static::ELEMENT_KEY_SALE_PRICE_START_DATE] = null;
+		$item_data[static::ELEMENT_KEY_SALE_PRICE_END_DATE] = null;
+		/*
+		 * pokud je cena zlevnena,
+		 * - doplnime do patricneho klice ponizenou cenu
+		 * - doplnime platnost slevy do klice 'sale_price_effective_date'
+		 */
+		if ($_product_price && $_product_price->discounted()) {
+			$item_data[static::ELEMENT_KEY_SALE_PRICE_START_DATE] = $_product_price->discountedFrom();
+			$item_data[static::ELEMENT_KEY_SALE_PRICE_END_DATE] = $_product_price->discountedTo();
+		}
+	}
+
 	protected function prepareDescription($card) {
 		$_description = $this->markdown->transform($card->getTeaser($this->lang));;
 		$_description = preg_replace('/[\x{feff}]/u', "", $_description);
@@ -167,7 +201,7 @@ class Atk14EshopReader {
 		$item_attrs[static::ELEMENT_KEY_UNIT_PRICING_BASE_MEASURE] = sprintf("%s %s", "1", $_unit->getDisplayUnit());
 		$item_attrs[static::ELEMENT_KEY_STOCKCOUNT] = $product->getStockcount();
 
-		$_product_price = $this->price_finder->getPrice($product, $_unit->getDisplayUnitMultiplier());
+		$this->prepareProductPriceData($product, $item_attrs);
 
 		$product_name = $product->getName($this->lang);
 		$product_ean = $product->hasKey("ean") ? $product->g("ean") : null;
@@ -189,38 +223,6 @@ class Atk14EshopReader {
 
 		$item_attrs[static::ELEMENT_KEY_PRODUCT_NAME] = $product_name;
 		$_image && ($item_attrs[static::ELEMENT_KEY_IMAGE_URL] = $_image);
-
-		$_currency = $this->price_finder->getCurrency();
-
-		$_price_with_currency = $this->options["price_with_currency"];
-
-		# zakladni cena pred slevou
-		$_product_price && ($item_attrs[static::ELEMENT_KEY_BASEPRICE_VAT] = number_format(round($_product_price->getPriceBeforeDiscountInclVat(),$_currency->getDecimalsSummary()),$_currency->getDecimalsSummary(),".",""));
-		$_product_price && ($_price_with_currency===true) && ($item_attrs[static::ELEMENT_KEY_BASEPRICE_VAT] .= sprintf(" %s",$_currency->getCode()));
-
-		# aktualni, konecna cena
-		$_product_price && ($item_attrs[static::ELEMENT_KEY_SALEPRICE_VAT] = number_format(round($_product_price->getPriceInclVat(),$_currency->getDecimalsSummary()),$_currency->getDecimalsSummary(),".",""));
-		$_product_price && ($_price_with_currency===true) && ($item_attrs[static::ELEMENT_KEY_SALEPRICE_VAT] .= sprintf(" %s",$_currency->getCode()));
-
-		/*
-		 * pokud je cena zlevnena,
-		 * - doplnime do patricneho klice ponizenou cenu
-		 * - doplnime platnost slevy do klice 'sale_price_effective_date'
-		 */
-		if ($_product_price && $_product_price->discounted()) {
-			#				$sale_price_effective_date_from = $_product_price->discountedFrom();
-			#				$sale_price_effective_date_to = $_product_price->discountedTo();
-			$sale_price_effective_date_from = null;
-			$sale_price_effective_date_to = null;
-			$sale_price_effective_date = [
-				$sale_price_effective_date_from ? date("c", strtotime($sale_price_effective_date_from)) : null,
-				$sale_price_effective_date_to ? date("c", strtotime($sale_price_effective_date_to)) : null,
-			];
-			# potrebujeme mit oba datumy, abychom platnost dali do feedu
-			if (sizeof(array_filter($sale_price_effective_date))===2) {
-				$item_attrs["SALE_PRICE_EFFECTIVE_DATE"] = join("/", $sale_price_effective_date);
-			}
-		}
 
 		return $item_attrs;
 	}
