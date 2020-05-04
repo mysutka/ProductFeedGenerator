@@ -16,8 +16,7 @@
 		"atk14/string4": "0.* >=0.1.1",
 		"atk14/xmole": "^1.0",
 		"atk14/files": "^1.0",
-		"atk14/drink-markdown": "^0.3",
-		"atk14/dbmole": "^1.0"
+		"atk14/drink-markdown": "^0.3"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "~6"
