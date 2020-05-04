@@ -17,7 +17,7 @@
 		"atk14/xmole": "^1.0",
 		"atk14/files": "^1.0",
 		"atk14/drink-markdown": "^0.3",
-		"atk14/core": "dev-master",
+		"atk14/core": "*",
 		"atk14/dbmole": "^1.0"
 	},
 	"require-dev": {
