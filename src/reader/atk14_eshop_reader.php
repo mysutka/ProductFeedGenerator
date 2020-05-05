@@ -21,6 +21,7 @@ class Atk14EshopReader {
 	const ELEMENT_KEY_UNIT = "UNIT";
 	const ELEMENT_KEY_UNIT_PRICING_BASE_MEASURE = "UNIT_PRICING_BASE_MEASURE";
 	const ELEMENT_KEY_STOCKCOUNT = "STOCKCOUNT";
+	const ELEMENT_KEY_AVAILABILITY = "CAN_BE_ORDERED";
 
 	const ELEMENT_KEY_SALE_PRICE_START_DATE = "SALE_PRICE_START_DATE";
 	const ELEMENT_KEY_SALE_PRICE_END_DATE = "SALE_PRICE_END_DATE";
@@ -80,6 +81,7 @@ class Atk14EshopReader {
 			"hostname" => null,
 			"image_geometry" => "800x800",
 			"image_watermark" => null,
+			"region" => "CR",
 		];
 	}
 
@@ -200,6 +202,8 @@ class Atk14EshopReader {
 		$item_attrs[static::ELEMENT_KEY_UNIT] = $_unit->getUnit();
 		$item_attrs[static::ELEMENT_KEY_UNIT_PRICING_BASE_MEASURE] = sprintf("%s %s", "1", $_unit->getDisplayUnit());
 		$item_attrs[static::ELEMENT_KEY_STOCKCOUNT] = $product->getStockcount();
+		$_region = \Region::GetRegionByCode($this->options["region"]);
+		$item_attrs[static::ELEMENT_KEY_AVAILABILITY] = $product->canBeOrdered(["region" => $_region]);
 
 		$this->prepareProductPriceData($product, $item_attrs);
 

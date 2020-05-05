@@ -33,7 +33,7 @@ class GoogleShoppingGenerator extends FeedGenerator {
 			"title" => "PRODUCTNAME",
 			"link" => "URL",
 			"g:brand" => "MANUFACTURER",
-			"g:availability" => "STOCKCOUNT",
+			"g:availability" => "CAN_BE_ORDERED",
 
 			"g:price" => "BASEPRICE_VAT",
 			"g:sale_price" => "PRICE_VAT",
@@ -47,7 +47,7 @@ class GoogleShoppingGenerator extends FeedGenerator {
 		if ($values["g:price"] == $values["g:sale_price"]) {
 			unset($values["g:sale_price"]);
 		}
-		$values["g:availability"] = ($values["g:availability"] > 0) ? "in stock" : "out of stock";
+		$values["g:availability"] = ($values["g:availability"] === true) ? "in stock" : "out of stock";
 		$ids = [
 			(isset($values["g:gtin"]) ? $values["g:gtin"] : null),
 			$mpn = null,
