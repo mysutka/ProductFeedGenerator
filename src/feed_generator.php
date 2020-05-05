@@ -14,11 +14,6 @@ class FeedGenerator {
 
 		$this->reader = $reader;
 
-		$service_class = get_class($this);
-		$service_name = preg_match("/([a-zA-Z0-9]+)Generator$/", $service_class, $matches);
-		$service_name = new \String4($matches[1]);
-		$this->service_name = $service_name->underscore();
-
 		$options += [
 			"logger" => new \logger(),
 			"output_format" => "xml",
@@ -47,17 +42,15 @@ class FeedGenerator {
 
 	function exportTo($output_filename, $options=[]) {
 
-		$service_name = $this->service_name;
-
 		if (php_sapi_name()=="cli" && isset($_SERVER["TERM"])) {
-			print("generating xml feed for service $service_name\n\n");
+			print("generating xml feed ${output_filename}\n\n");
 		}
-		$this->logger->info("generating xml feed for service $service_name");
+		$this->logger->info("generating xml feed ${output_filename}");
 
 		if ($this->_gen_feed($output_filename)) {
-			$this->logger->info("xml product feed for service $service_name successfully generated");
+			$this->logger->info("xml product feed ${output_filename} successfully generated");
 		} else {
-			$this->logger->info("xml product feed for service $service_name not generated");
+			$this->logger->info("xml product feed ${output_filename} not generated");
 		}
 	}
 
