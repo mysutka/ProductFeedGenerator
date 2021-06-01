@@ -91,7 +91,17 @@ class LimitedEshopReader extends ProductFeedGenerator\Reader\Atk14EshopReader {
   }
 }
 ```
-
+If you need to filter out some products by a specific rule you can do it by `itemToArray()` method. See example
+```php
+class OtherLimitedEshopReader extends ProductFeedGenerator\Reader\Atk14EshopReader {
+  
+  function itemToArray($product) {
+      if (!$product->canBeOrdered()) {
+          return null;
+      }
+  }
+}
+```
 ## Custom Generator
 
 Sometimes happenes that we need to send the comparison service a value that is a bit altered while the generator provides it as it is stored in the database. So let's create our custom Generator.
