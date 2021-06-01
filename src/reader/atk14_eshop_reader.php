@@ -20,6 +20,7 @@ class Atk14EshopReader {
 
 	const ELEMENT_KEY_UNIT = "UNIT";
 	const ELEMENT_KEY_UNIT_PRICING_BASE_MEASURE = "UNIT_PRICING_BASE_MEASURE";
+	const ELEMENT_KEY_UNIT_PRICING_MEASURE = "UNIT_PRICING_MEASURE";
 	const ELEMENT_KEY_STOCKCOUNT = "STOCKCOUNT";
 	const ELEMENT_KEY_AVAILABILITY = "CAN_BE_ORDERED";
 
@@ -126,6 +127,9 @@ class Atk14EshopReader {
 
 		foreach($card->getProducts($card_options) as $p) {
 			$p_ar = $this->itemToArray($p);
+			if (!$p_ar) {
+				continue;
+			}
 			$p_ar[static::ELEMENT_KEY_CATEGORIES] = $_categories;
 			$p_ar[static::ELEMENT_KEY_DESCRIPTION] = $_description;
 			$p_ar[static::ELEMENT_KEY_GROUP_ID] = $_card_id;
