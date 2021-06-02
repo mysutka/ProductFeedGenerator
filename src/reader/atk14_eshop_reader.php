@@ -174,7 +174,7 @@ class Atk14EshopReader {
 		$_product_price && ($item_data[static::ELEMENT_KEY_SALEPRICE_VAT] = number_format(round($_product_price->getPriceInclVat(),$_currency->getDecimalsSummary()),$_currency->getDecimalsSummary(),".",""));
 		$_product_price && ($_price_with_currency===true) && ($item_data[static::ELEMENT_KEY_SALEPRICE_VAT] .= sprintf(" %s",$_currency->getCode()));
 
-		$item_data[static::ELEMENT_KEY_PRICE_IS_DISCOUNTED] = $_product_price->discounted();
+		$_product_price && $item_data[static::ELEMENT_KEY_PRICE_IS_DISCOUNTED] = $_product_price->discounted();
 		$item_data[static::ELEMENT_KEY_SALE_PRICE_START_DATE] = null;
 		$item_data[static::ELEMENT_KEY_SALE_PRICE_END_DATE] = null;
 		/*
