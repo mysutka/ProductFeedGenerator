@@ -197,7 +197,10 @@ class Atk14EshopReader {
 	/**
 	 * Vyplneni atributu spolecnych pro vsechny vyhledavace.
 	 */
-	function itemToArray($product) {
+	function itemToArray(\Product $product) {
+		if (is_null($this->price_finder->getPrice($product))) {
+			return null;
+		}
 		$_image = $product->getImage();
 		$_unit = $product->getUnit();
 
