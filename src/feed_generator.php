@@ -15,6 +15,7 @@ class FeedGenerator {
 		$this->reader = $reader;
 
 		$options += [
+			"full_feed" => !DEVELOPMENT,
 			"logger" => new \logger(),
 			"output_format" => "xml",
 
@@ -139,7 +140,7 @@ class FeedGenerator {
 				isset($_SERVER["TERM"]) && print(sprintf("processed %d records of %d\n", $offset+sizeof($objects), $count));
 			}
 			$offset += $limit;
-			if (DEVELOPMENT) {
+			if ($this->options["full_feed"]===false) {
 				print("\nDEVELOPMENT mode => we have enough => break\n\n");
 				break;
 			}
