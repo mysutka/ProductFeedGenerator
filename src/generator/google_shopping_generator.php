@@ -11,12 +11,13 @@ class GoogleShoppingGenerator extends FeedGenerator {
 			"price_with_currency" => true,
 			"category_path_connector" => ">",
 			"xml_item_element_name" => "entry",
-			"feed_title" => sprintf("%s | %s", ATK14_APPLICATION_DESCRIPTION, ATK14_APPLICATION_NAME),
+			"feed_title" => join( " | ", array_filter([ATK14_APPLICATION_DESCRIPTION, ATK14_APPLICATION_NAME])),
 
 			"feed_begin" => '<feed xmlns="http://www.w3.org/2005/Atom" xmlns:g="http://base.google.com/ns/1.0">',
 			"feed_end" => '</feed>',
 			"fixed_values" => [
 				"g:condition" => "new",
+				"g:availability" => "in stock",
 			],
 		];
 		return parent::__construct($reader, $options);
@@ -33,13 +34,10 @@ class GoogleShoppingGenerator extends FeedGenerator {
 			"title" => "PRODUCTNAME",
 			"link" => "URL",
 			"g:brand" => "MANUFACTURER",
-			"g:availability" => "CAN_BE_ORDERED",
 
 			"g:price" => "BASEPRICE_VAT",
 			"g:sale_price" => "PRICE_VAT",
-
-			"SALE_PRICE_START_DATE" => "SALE_PRICE_START_DATE",
-			"SALE_PRICE_END_DATE" => "SALE_PRICE_END_DATE",
+			"g:sale_price_effective_date" => "SALEPRICE_EFFECTIVE_DATE",
 		];
 	}
 
@@ -47,7 +45,6 @@ class GoogleShoppingGenerator extends FeedGenerator {
 		if ($values["g:price"] == $values["g:sale_price"]) {
 			unset($values["g:sale_price"]);
 		}
-		$values["g:availability"] = ($values["g:availability"] === true) ? "in stock" : "out of stock";
 		$ids = [
 			(isset($values["g:gtin"]) ? $values["g:gtin"] : null),
 			$mpn = null,
@@ -56,16 +53,6 @@ class GoogleShoppingGenerator extends FeedGenerator {
 		if (count(array_filter($ids))<2) {
 			$values["g:identifier_exists"] = "no";
 		}
-		$sale_price_dates = [
-			isset($values["SALE_PRICE_START_DATE"]) ? date("c", strtotime($values["SALE_PRICE_START_DATE"])) : null,
-			isset($values["SALE_PRICE_END_DATE"]) ? date("c", strtotime($values["SALE_PRICE_END_DATE"])) : null,
-		];
-		# potrebujeme mit oba datumy, abychom platnost dali do feedu
-		if (sizeof(array_filter($sale_price_dates)) === 2) {
-			$values["g:sale_price_effective_date"] = join("/", $sale_price_dates);
-		}
-		unset($values["SALE_PRICE_START_DATE"]);
-		unset($values["SALE_PRICE_END_DATE"]);
 		return $values;
 	}
 }
