@@ -28,6 +28,7 @@ Two basic classes are used which can be extended
 - image_watermark - string [default: null => no watermark is used]
 
 ### FeedGenerator options
+- full_feed
 - logger
 - output_format
 - xml_item_element_name
