@@ -13,6 +13,7 @@ class Atk14EshopReader {
 	const ELEMENT_KEY_MPN = "MPN";
 	const ELEMENT_KEY_GROUP_ID = "ITEMGROUP_ID";
 	const ELEMENT_KEY_ITEM_ID = "ITEM_ID";
+	const ELEMENT_KEY_CATALOG_ID = "CATALOG_ID";
 	const ELEMENT_KEY_URL = "URL";
 	const ELEMENT_KEY_IMAGE_URL = "IMGURL";
 	const ELEMENT_KEY_BASEPRICE_VAT = "BASEPRICE_VAT";
@@ -228,6 +229,7 @@ class Atk14EshopReader {
 			$_image = $_ppq->getUrl($_url_options);
 		}
 
+		$item_attrs[static::ELEMENT_KEY_CATALOG_ID] = $product->getCatalogId();
 		$item_attrs[static::ELEMENT_KEY_ITEM_ID] = $product->getId();
 		$item_attrs[static::ELEMENT_KEY_EAN] = $product_ean;
 		$item_attrs[static::ELEMENT_KEY_MPN] = null;
