@@ -17,7 +17,6 @@ class GoogleShoppingGenerator extends FeedGenerator {
 			"feed_end" => '</feed>',
 			"fixed_values" => [
 				"g:condition" => "new",
-				"g:availability" => "in stock",
 			],
 		];
 		return parent::__construct($reader, $options);
@@ -46,7 +45,8 @@ class GoogleShoppingGenerator extends FeedGenerator {
 		if ($values["g:price"] == $values["g:sale_price"]) {
 			unset($values["g:sale_price"]);
 		}
-		$values["g:availability"] = ($values["g:availability"] === true) ? "in stock" : "out of stock";
+		($values["g:availability"] === true) && ($values["g:availability"] = "in stock");
+		($values["g:availability"] === false) && ($values["g:availability"] = "out of stock");
 		$ids = [
 			(isset($values["g:gtin"]) ? $values["g:gtin"] : null),
 			$mpn = null,
