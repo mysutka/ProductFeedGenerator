@@ -150,7 +150,10 @@ class FeedGenerator {
 			$_feed_end && \Files::AppendToFile($filename_tmp, "\n".$_feed_end);
 		}
 
-		\Files::MoveFile($filename_tmp,$output_filename);
+		\Files::MoveFile($filename_tmp,$output_filename, $error, $error_string);
+		if ($error) {
+			throw new \Exception($error_string);
+		}
 		return true;
 	}
 
