@@ -87,23 +87,32 @@ class Atk14EshopReader {
 		];
 	}
 
+	protected $cachedIds = null;
+
 	function getObjectIds($options=[]) {
 		$options += [
 			"offset" => 0,
 			"limit" => 100,
 			"exclude_tag" => \Tag::FindFirst("code","exclude_from_xml"),
 		];
-		$ids = $this->dbmole->selectIntoArray("SELECT distinct(id) FROM cards
-			WHERE
-			id NOT IN (SELECT cards.id FROM cards,card_tags WHERE card_tags.card_id=cards.id AND card_tags.id=:exclude_tag_id) AND
-			deleted='f' AND
-			visible='t'
-			ORDER BY id
-			LIMIT :limit OFFSET :offset", [
-				":offset" => $options["offset"],
-				":limit" => $options["limit"],
-				":exclude_tag_id" => $options["exclude_tag"],
-			]);
+		if (is_null($this->cachedIds)) {
+			$this->cachedIds = $this->dbmole->selectIntoArray("SELECT distinct(id) FROM cards
+				WHERE
+				id NOT IN (SELECT cards.id FROM cards,card_tags WHERE card_tags.card_id=cards.id AND card_tags.id=:exclude_tag_id) AND
+				deleted='f' AND
+				visible='t'
+				ORDER BY id
+				LIMIT :limit OFFSET :offset", [
+					":offset" => $options["offset"],
+					":limit" => $options["limit"],
+					":exclude_tag_id" => $options["exclude_tag"],
+				]);
+		}
+		$ids = array_slice($this->cachedIds,$options["offset"],$options["limit"]);
+
+		\Cache::Clear("Card");
+		\Cache::Prepare("Card",$ids);
+
 		return $ids;
 	}
 
