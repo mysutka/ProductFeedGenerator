@@ -2,6 +2,8 @@
 namespace ProductFeedGenerator\Generator;
 use ProductFeedGenerator\FeedGenerator;
 
+use ProductFeedGenerator\Reader\Atk14EshopReader;
+
 class HeurekaCzGenerator extends FeedGenerator {
 
 	function __construct($reader, $options=[]) {
@@ -13,7 +15,6 @@ class HeurekaCzGenerator extends FeedGenerator {
 
 			"category_path_connector" => "|",
 			"fixed_values" => [
-				"DELIVERY_DATE" => 6,
 			],
 		];
 		return parent::__construct($reader, $options);
@@ -34,6 +35,21 @@ class HeurekaCzGenerator extends FeedGenerator {
 			"ITEMGROUP_ID" => "ITEMGROUP_ID",
 
 			"PRICE_VAT" => "PRICE_VAT",
+
+			# only required to calculate DELIVERY_DATE and to be disposed in afterFilter
+			"STOCKCOUNT" => "STOCKCOUNT",
+
 		];
 	}
+
+	function afterFilter($values) {
+		if ($values[Atk14EshopReader::ELEMENT_KEY_STOCKCOUNT]===0) {
+			$values["DELIVERY_DATE"] = "";
+		} else {
+			$values["DELIVERY_DATE"] = "0";
+		}
+		unset($values[Atk14EshopReader::ELEMENT_KEY_STOCKCOUNT]);
+		return $values;
+	}
+
 }
