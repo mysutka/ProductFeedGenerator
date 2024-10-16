@@ -43,10 +43,16 @@ class HeurekaCzGenerator extends FeedGenerator {
 	}
 
 	function afterFilter($values) {
-		if ($values[Atk14EshopReader::ELEMENT_KEY_STOCKCOUNT]===0) {
-			$values["DELIVERY_DATE"] = "";
-		} else {
-			$values["DELIVERY_DATE"] = "0";
+		// DELIVERY_DATE is based on value in STOCKCOUNT
+		// if the product is on stock we fill 0, otherwise empty value
+		// @TODO other values can be used depending on number of days from order acceptance to delivery
+		// we do not override value given via fixed_values parameter
+		if (!isset($this->options["fixed_values"]["DELIVERY_DATE"])) {
+			if ($values[Atk14EshopReader::ELEMENT_KEY_STOCKCOUNT]===0) {
+				$values["DELIVERY_DATE"] = "";
+			} else {
+				$values["DELIVERY_DATE"] = "0";
+			}
 		}
 		unset($values[Atk14EshopReader::ELEMENT_KEY_STOCKCOUNT]);
 		return $values;
