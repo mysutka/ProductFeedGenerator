@@ -134,7 +134,7 @@ class Atk14EshopReader {
 		$_categories = $this->prepareCategories($card);
 		$_description = $this->prepareDescription($card);
 		$_card_id = $card->getId();
-		$_card_name = $card->getName();
+		$_card_name = $card->getName($this->lang);
 		$_product_url = $this->_buildCardLink($card, $options);
 
 		foreach($card->getProducts($card_options) as $p) {
