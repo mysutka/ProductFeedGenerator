@@ -89,6 +89,17 @@ class Atk14EshopReader {
 
 	protected $cachedIds = null;
 
+	protected $idsToIgnore = null;
+
+	/**
+	 * This method can call a query to find object which should not be output.
+	 *
+	 * @return Card|int[]
+	 */
+	function getObjectIdsToIgnore() {
+		return null;
+	}
+
 	function getObjectIds($options=[]) {
 		$options += [
 			"offset" => 0,
@@ -96,17 +107,28 @@ class Atk14EshopReader {
 			"exclude_tag" => \Tag::FindFirst("code","exclude_from_xml"),
 		];
 		if (is_null($this->cachedIds)) {
+			$conditions = [
+				"id NOT IN (SELECT cards.id FROM cards,card_tags WHERE card_tags.card_id=cards.id AND card_tags.id=:exclude_tag_id)",
+				"deleted='f'",
+				"visible='t'",
+			];
+			$bindAr = [
+				":offset" => $options["offset"],
+				":limit" => $options["limit"],
+				":exclude_tag_id" => $options["exclude_tag"],
+			];
+			$this->idsToIgnore = $this->getObjectIdsToIgnore();
+			if (!is_null($this->idsToIgnore)) {
+				$conditions[] = "id NOT IN :ids_to_ignore";
+				$bindAr[":ids_to_ignore"] = $this->idsToIgnore;
+			}
+			$conditions = join(" AND ", array_map(function($x) {
+				return "({$x})";
+			}, $conditions));
 			$this->cachedIds = $this->dbmole->selectIntoArray("SELECT distinct(id) FROM cards
-				WHERE
-				id NOT IN (SELECT cards.id FROM cards,card_tags WHERE card_tags.card_id=cards.id AND card_tags.id=:exclude_tag_id) AND
-				deleted='f' AND
-				visible='t'
+				WHERE {$conditions}
 				ORDER BY id
-				LIMIT :limit OFFSET :offset", [
-					":offset" => $options["offset"],
-					":limit" => $options["limit"],
-					":exclude_tag_id" => $options["exclude_tag"],
-				]);
+				LIMIT :limit OFFSET :offset", $bindAr);
 		}
 		$ids = array_slice($this->cachedIds,$options["offset"],$options["limit"]);
 
