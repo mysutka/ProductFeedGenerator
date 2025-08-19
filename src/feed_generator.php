@@ -44,14 +44,14 @@ class FeedGenerator {
 	function exportTo($output_filename, $options=[]) {
 
 		if (php_sapi_name()=="cli" && isset($_SERVER["TERM"])) {
-			print("generating xml feed ${output_filename}\n\n");
+			print("generating xml feed {$output_filename}\n\n");
 		}
-		$this->logger->info("generating xml feed ${output_filename}");
+		$this->logger->info("generating xml feed {$output_filename}");
 
 		if ($this->_gen_feed($output_filename)) {
-			$this->logger->info("xml product feed ${output_filename} successfully generated");
+			$this->logger->info("xml product feed {$output_filename} successfully generated");
 		} else {
-			$this->logger->info("xml product feed ${output_filename} not generated");
+			$this->logger->info("xml product feed {$output_filename} not generated");
 		}
 	}
 

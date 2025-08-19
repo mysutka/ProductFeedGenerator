@@ -186,7 +186,7 @@ class Atk14EshopReader {
 				continue;
 			}
 			$_cat_glue = $this->options["category_path_connector"];
-			$path = $c->getNamePath($this->lang, array("glue" => " ${_cat_glue} ", "start_level" => 1));
+			$path = $c->getNamePath($this->lang, array("glue" => " {$_cat_glue} ", "start_level" => 1));
 			$categories[] = $path;
 		}
 		// Element CATEGORYTEXT se vyskytuje více než jednou -> Heureka
