@@ -80,10 +80,12 @@ class Atk14EshopReader {
 			"price_finder" => $_default_price_finder,
 			"lang" => null,
 			"category_path_connector" => ">",
+			"merge_multiple_categories" => false,
 			"hostname" => null,
 			"image_geometry" => "800x800",
 			"image_watermark" => null,
 			"region" => "CR",
+			"categories_limit" => 1,
 		];
 	}
 
@@ -187,11 +189,19 @@ class Atk14EshopReader {
 			}
 			$_cat_glue = $this->options["category_path_connector"];
 			$path = $c->getNamePath($this->lang, array("glue" => " {$_cat_glue} ", "start_level" => 1));
+			$path = str_replace(",", "", $path);
 			$categories[] = $path;
 		}
 		// Element CATEGORYTEXT se vyskytuje více než jednou -> Heureka
 		// zpracovává pouze první výskyt CATEGORYTEXT u každé položky.
-		$categories = array_slice($categories, 0, 1);
+		// https://forum.mergado.cz/t/element-categorytext/2770
+		$categories_limit = $this->options["categories_limit"];
+		if (!is_null($categories_limit)) {
+			$categories = array_slice($categories, 0, (int)$categories_limit);
+		}
+		if ($this->options["merge_multiple_categories"]===true) {
+			$categories = [implode(", ", $categories)];
+		}
 		return $categories;
 	}
 

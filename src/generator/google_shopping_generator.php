@@ -10,6 +10,10 @@ class GoogleShoppingGenerator extends FeedGenerator {
 			"eshop_url" => ATK14_HTTP_HOST,
 			"price_with_currency" => true,
 			"category_path_connector" => ">",
+			// Google shopping needs to have all categories in one element.
+			// For Google Ads bidding only the first one is used
+			"merge_multiple_categories" => true,
+			"categories_limit" => 5,
 			"xml_item_element_name" => "entry",
 			"feed_title" => join( " | ", array_filter([ATK14_APPLICATION_DESCRIPTION, ATK14_APPLICATION_NAME])),
 
