@@ -13,7 +13,9 @@ class GoogleShoppingGenerator extends FeedGenerator {
 			// Google shopping needs to have all categories in one element.
 			// For Google Ads bidding only the first one is used
 			"merge_multiple_categories" => true,
-			"categories_limit" => 5,
+			// Google accepts up to five categories, we send out only one
+			// and leave it up to users how much they want
+			"categories_limit" => 1,
 			"xml_item_element_name" => "entry",
 			"feed_title" => join( " | ", array_filter([ATK14_APPLICATION_DESCRIPTION, ATK14_APPLICATION_NAME])),
 
