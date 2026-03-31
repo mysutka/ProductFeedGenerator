@@ -141,8 +141,7 @@ class Atk14EshopReader {
 	}
 
 	function getObjects($options=[]) {
-		\Cache::Clear();
-		return \Card::GetInstanceById($this->getObjectIds($options));
+		return \Cache::Get("Card",$this->getObjectIds($options));
 	}
 
 	function objectToArray($card,$options=array()) {
