@@ -102,6 +102,20 @@ class Atk14EshopReader {
 		return null;
 	}
 
+	protected function _getConditions() {
+		$conditions = [
+			"id NOT IN (SELECT cards.id FROM cards,card_tags WHERE card_tags.card_id=cards.id AND card_tags.id=:exclude_tag_id)",
+			"deleted='f'",
+			"visible='t'",
+		];
+
+		$this->idsToIgnore = $this->getObjectIdsToIgnore();
+		if (!is_null($this->idsToIgnore)) {
+			$conditions[] = "id NOT IN :ids_to_ignore";
+		}
+		return $conditions;
+	}
+
 	function getObjectIds($options=[]) {
 		$options += [
 			"offset" => 0,
@@ -109,19 +123,12 @@ class Atk14EshopReader {
 			"exclude_tag" => \Tag::FindFirst("code","exclude_from_xml"),
 		];
 		if (is_null($this->cachedIds)) {
-			$conditions = [
-				"id NOT IN (SELECT cards.id FROM cards,card_tags WHERE card_tags.card_id=cards.id AND card_tags.id=:exclude_tag_id)",
-				"deleted='f'",
-				"visible='t'",
-			];
+			$conditions = $this->_getConditions();
 			$bindAr = [
-				":offset" => $options["offset"],
-				":limit" => $options["limit"],
 				":exclude_tag_id" => $options["exclude_tag"],
 			];
 			$this->idsToIgnore = $this->getObjectIdsToIgnore();
 			if (!is_null($this->idsToIgnore)) {
-				$conditions[] = "id NOT IN :ids_to_ignore";
 				$bindAr[":ids_to_ignore"] = $this->idsToIgnore;
 			}
 			$conditions = join(" AND ", array_map(function($x) {
@@ -130,7 +137,7 @@ class Atk14EshopReader {
 			$this->cachedIds = $this->dbmole->selectIntoArray("SELECT distinct(id) FROM cards
 				WHERE {$conditions}
 				ORDER BY id
-				LIMIT :limit OFFSET :offset", $bindAr);
+				", $bindAr);
 		}
 		$ids = array_slice($this->cachedIds,$options["offset"],$options["limit"]);
 
@@ -138,6 +145,30 @@ class Atk14EshopReader {
 		\Cache::Prepare("Card",$ids);
 
 		return $ids;
+	}
+
+	function getObjectsCount($options=[]) {
+		$options += [
+			"exclude_tag" => \Tag::FindFirst("code","exclude_from_xml"),
+		];
+
+		$conditions = $this->_getConditions();
+		$bindAr = [
+			":exclude_tag_id" => $options["exclude_tag"],
+		];
+		if (!is_null($this->idsToIgnore)) {
+			$bindAr[":ids_to_ignore"] = $this->idsToIgnore;
+		}
+		$conditions = join(" AND ", array_map(function($x) {
+			return "({$x})";
+		}, $conditions));
+		return $this->dbmole->selectInt("
+			SELECT
+				count(distinct(id))
+			FROM
+				cards
+			WHERE
+				{$conditions}", $bindAr);
 	}
 
 	function getObjects($options=[]) {

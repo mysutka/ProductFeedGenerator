@@ -66,7 +66,7 @@ class FeedGenerator {
 			\Files::WriteToFile($filename_tmp, trim("$xml_head")."\n");
 		}
 
-		$count = sizeof($this->reader->getObjectIds(["limit" => null]));
+		$count = $this->reader->getObjectsCount();
 
 		$offset = 0; $limit = 100;
 
