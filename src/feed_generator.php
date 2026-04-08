@@ -73,6 +73,7 @@ class FeedGenerator {
 		while (
 			$objects = $this->reader->getObjects([
 				"offset" => $offset,
+				"limit" => $limit,
 			])
 		) {
 
@@ -187,8 +188,6 @@ class FeedGenerator {
 			"\n",
 		];
 		return join("\n", $_begin);
-
-		return "{$_prolog}\n{$_feed_begin}\n{$_feed_title}\n{$_eshop_url}\n";
 	}
 
 	function getOutputFormat() {
