@@ -38,6 +38,8 @@ class Atk14EshopReader {
 		$this->constructor_options = $constructor_options;
 		$this->live_options = [];
 		$this->setOptions();
+
+		$this->idsToIgnore = $this->getObjectIdsToIgnore();
 	}
 
 
@@ -109,7 +111,6 @@ class Atk14EshopReader {
 			"visible='t'",
 		];
 
-		$this->idsToIgnore = $this->getObjectIdsToIgnore();
 		if (!is_null($this->idsToIgnore)) {
 			$conditions[] = "id NOT IN :ids_to_ignore";
 		}
@@ -127,7 +128,6 @@ class Atk14EshopReader {
 			$bindAr = [
 				":exclude_tag_id" => $options["exclude_tag"],
 			];
-			$this->idsToIgnore = $this->getObjectIdsToIgnore();
 			if (!is_null($this->idsToIgnore)) {
 				$bindAr[":ids_to_ignore"] = $this->idsToIgnore;
 			}

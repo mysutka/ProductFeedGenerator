@@ -80,6 +80,7 @@ class FeedGenerator {
 			$xml_out = "";
 			$write_header = true;
 			$fixed_values = $this->options["fixed_values"];
+			$null_keys = array_keys(array_filter($fixed_values, "is_null"));
 
 			foreach($objects as $_object) {
 				$item_out = "";
@@ -99,8 +100,6 @@ class FeedGenerator {
 					$item = $fixed_values + $item;
 					return $item;
 				});
-
-				$null_keys = array_keys(array_filter($fixed_values, "is_null"));
 				# keys in fixed_values containing value null will be removed from output
 				array_walk($itemAr, function(&$item) use ($null_keys) {
 					foreach($null_keys as $k) {
