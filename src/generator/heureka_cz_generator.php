@@ -4,6 +4,11 @@ use ProductFeedGenerator\FeedGenerator;
 
 use ProductFeedGenerator\Reader\Atk14EshopReader;
 
+/**
+ * This class is used to prepare structure to generate a feed for Heureka.cz.
+ *
+ * @see https://sluzby.heureka.cz/napoveda/xml-feed/ XML feed specification
+ */
 class HeurekaCzGenerator extends FeedGenerator {
 
 	function __construct($reader, $options=[]) {
@@ -20,7 +25,7 @@ class HeurekaCzGenerator extends FeedGenerator {
 		return parent::__construct($reader, $options);
 	}
 
-	function getAttributesMap() {
+	function getAttributesMap(): array {
 		return [
 			"CATEGORYTEXT" => "CATEGORYTEXT",
 			"DESCRIPTION" => "DESCRIPTION",
@@ -43,10 +48,8 @@ class HeurekaCzGenerator extends FeedGenerator {
 	}
 
 	function afterFilter($values) {
-		// DELIVERY_DATE is based on value in STOCKCOUNT
-		// if the product is on stock we fill 0, otherwise empty value
-		// @TODO other values can be used depending on number of days from order acceptance to delivery
-		// we do not override value given via fixed_values parameter
+		// DELIVERY_DATE: 0 = in stock, empty = not available.
+		// Custom value can be passed via fixed_values["DELIVERY_DATE"] from the robot.
 		if (!isset($this->options["fixed_values"]["DELIVERY_DATE"])) {
 			if ($values[Atk14EshopReader::ELEMENT_KEY_STOCKCOUNT]===0) {
 				$values["DELIVERY_DATE"] = "";

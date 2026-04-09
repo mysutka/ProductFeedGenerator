@@ -1,7 +1,7 @@
 <?php
 namespace ProductFeedGenerator;
 
-class FeedGenerator {
+abstract class FeedGenerator {
 
 	function __construct($reader_or_options, $options=null) {
 		if (is_array($reader_or_options) && is_null($options)) {
@@ -69,6 +69,8 @@ class FeedGenerator {
 		$count = $this->reader->getObjectsCount();
 
 		$offset = 0; $limit = 100;
+		$fixed_values = $this->options["fixed_values"];
+		$null_keys = array_keys(array_filter($fixed_values, "is_null"));
 
 		while (
 			$objects = $this->reader->getObjects([
@@ -79,23 +81,20 @@ class FeedGenerator {
 
 			$xml_out = "";
 			$write_header = true;
-			$fixed_values = $this->options["fixed_values"];
-			$null_keys = array_keys(array_filter($fixed_values, "is_null"));
 
 			foreach($objects as $_object) {
 				$item_out = "";
 
-				# ziskani hodnot v poli v univerzalni podobe
-				# jsou tam vsechny hodnoty, ktere se mohou hodit pro ruzne typy feedu
+				# get all product values in a universal format
+				# contains all values that may be needed for different feed types
 				$itemAr = $this->reader->objectToArray($_object,$_object_to_ar_options);
 
-				# prevedeme do podoby pro dany typ sluzby (feedu),
-				# vrati se jen nektere hodnoty se specifickymi nazvy klicu
+				# transform to the format required by the target service (feed),
+				# only a subset of values with service-specific key names is returned
 				$itemAr = $this->transformForService($itemAr);
 
-				# pridame fixni hodnoty, ktere neni treba zjistovat z db produktu, nebo jsou stejne u vsech items
-				# pripadne chceme posila nejakou hodnotu specifickou pro dany feed
-				# @todo bude stacit, kdyz je tam nacpeme skrz $options
+				# add fixed values that do not need to be fetched from the db, are the same for all items,
+				# or are specific to the given feed
 				array_walk($itemAr, function(&$item) use ($fixed_values) {
 					$item = $fixed_values + $item;
 					return $item;
@@ -192,6 +191,8 @@ class FeedGenerator {
 	function getOutputFormat() {
 		return $this->options["output_format"];
 	}
+
+	abstract function getAttributesMap(): array;
 
 	function transformForService($object_ar=[]) {
 		$transformMap = $this->getAttributesMap();

@@ -28,7 +28,7 @@ class GoogleShoppingGenerator extends FeedGenerator {
 		return parent::__construct($reader, $options);
 	}
 
-	function getAttributesMap() {
+	function getAttributesMap(): array {
 		return [
 			"g:product_type" => "CATEGORYTEXT",
 			"description" => "DESCRIPTION",

@@ -14,7 +14,7 @@ class GoogleMerchantsGenerator extends FeedGenerator {
 		return parent::__construct($reader, $options);
 	}
 
-	function getAttributesMap() {
+	function getAttributesMap(): array {
 		return [
 			"ID" => "ITEM_ID",
 			"Item description" => "DESCRIPTION",

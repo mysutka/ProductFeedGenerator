@@ -56,7 +56,7 @@ class Atk14EshopReader {
 	 * - options prichazejici z konstruktoru Atk14EshopReader
 	 * - options predane v setOptions
 	 *
-	 * @toto tak toto poradne otestovat!!!
+	 * @todo tak toto poradne otestovat!!!
 	 */
 	function setOptions($options=[]) {
 		$this->live_options = array_merge($this->live_options, $options);
@@ -318,11 +318,7 @@ class Atk14EshopReader {
 
 	function _buildCardLink($card, $options=[]) {
 		$options += array(
-			"additional_url_params" => [
-#				"utm_source" => "google",
-#				"utm_medium" => "cpc",
-#				"utm_campaign" => "shopping",
-			],
+			"additional_url_params" => [],
 		);
 
 		$_url_params = array(
