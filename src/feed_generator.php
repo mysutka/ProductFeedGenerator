@@ -71,6 +71,8 @@ abstract class FeedGenerator {
 		$offset = 0; $limit = 100;
 		$fixed_values = $this->options["fixed_values"];
 		$null_keys = array_keys(array_filter($fixed_values, "is_null"));
+		$xml_item_element_name = $this->options["xml_item_element_name"];
+		$is_cli = php_sapi_name() == "cli";
 
 		while (
 			$objects = $this->reader->getObjects([
@@ -126,7 +128,6 @@ abstract class FeedGenerator {
 					}
 					break;
 				default:
-					$xml_item_element_name = $this->options["xml_item_element_name"];
 					$item_out = $this->_array_to_xml($itemAr, $xml_item_element_name);
 					break;
 				}
@@ -135,7 +136,7 @@ abstract class FeedGenerator {
 
 			\Files::AppendToFile($filename_tmp,$xml_out);
 
-			if (php_sapi_name()=="cli") {
+			if ($is_cli) {
 				isset($_SERVER["TERM"]) && print(sprintf("processed %d records of %d\n", $offset+sizeof($objects), $count));
 			}
 			$offset += $limit;

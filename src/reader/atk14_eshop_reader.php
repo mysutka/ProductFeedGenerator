@@ -40,6 +40,7 @@ class Atk14EshopReader {
 		$this->setOptions();
 
 		$this->idsToIgnore = $this->getObjectIdsToIgnore();
+		$this->excludeTag = \Tag::FindFirst("code", "exclude_from_xml");
 	}
 
 
@@ -121,7 +122,7 @@ class Atk14EshopReader {
 		$options += [
 			"offset" => 0,
 			"limit" => 100,
-			"exclude_tag" => \Tag::FindFirst("code","exclude_from_xml"),
+			"exclude_tag" => $this->excludeTag,
 		];
 		if (is_null($this->cachedIds)) {
 			$conditions = $this->_getConditions();
@@ -149,7 +150,7 @@ class Atk14EshopReader {
 
 	function getObjectsCount($options=[]) {
 		$options += [
-			"exclude_tag" => \Tag::FindFirst("code","exclude_from_xml"),
+			"exclude_tag" => $this->excludeTag,
 		];
 
 		$conditions = $this->_getConditions();
