@@ -73,6 +73,7 @@ abstract class FeedGenerator {
 		$null_keys = array_keys(array_filter($fixed_values, "is_null"));
 		$xml_item_element_name = $this->options["xml_item_element_name"];
 		$is_cli = php_sapi_name() == "cli";
+		$write_header = true;
 
 		while (
 			$objects = $this->reader->getObjects([
@@ -82,7 +83,6 @@ abstract class FeedGenerator {
 		) {
 
 			$xml_out = "";
-			$write_header = true;
 
 			foreach($objects as $_object) {
 				$item_out = "";
