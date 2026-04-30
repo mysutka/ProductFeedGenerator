@@ -99,14 +99,12 @@ abstract class FeedGenerator {
 				# or are specific to the given feed
 				array_walk($itemAr, function(&$item) use ($fixed_values) {
 					$item = $fixed_values + $item;
-					return $item;
 				});
 				# keys in fixed_values containing value null will be removed from output
 				array_walk($itemAr, function(&$item) use ($null_keys) {
 					foreach($null_keys as $k) {
 						unset($item[$k]);
 					}
-					return $item;
 				});
 
 				array_walk($itemAr, function(&$item) {
@@ -167,7 +165,6 @@ abstract class FeedGenerator {
 			$_prolog = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
 		}
 
-		$_feed_begin = "";
 		$_feed_title = "";
 		$_eshop_url = "";
 
@@ -178,14 +175,12 @@ abstract class FeedGenerator {
 			$_eshop_url = sprintf("<link rel=\"self\" href=\"https://%s\" />\n", $this->options["eshop_url"]);
 		}
 
-		$_feed_begin = $this->options["feed_begin"];
-		$_begin = [
+		$_begin = array_filter([
 			$_prolog,
-			$_feed_begin,
+			$this->options["feed_begin"],
 			$_feed_title,
 			$_eshop_url,
-			"\n",
-		];
+		]);
 		return join("\n", $_begin);
 	}
 

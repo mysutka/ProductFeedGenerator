@@ -149,6 +149,10 @@ class Atk14EshopReader {
 	}
 
 	function getObjectsCount($options=[]) {
+		if (!is_null($this->cachedIds)) {
+			return count($this->cachedIds);
+		}
+
 		$options += [
 			"exclude_tag" => $this->excludeTag,
 		];
@@ -267,7 +271,7 @@ class Atk14EshopReader {
 	}
 
 	protected function prepareDescription($card) {
-		$_description = $this->markdown->transform($card->getTeaser($this->lang));;
+		$_description = $this->markdown->transform($card->getTeaser($this->lang));
 		$_description = preg_replace('/[\x{feff}]/u', "", $_description);
 		return strip_tags($_description);
 	}
