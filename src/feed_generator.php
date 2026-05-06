@@ -67,82 +67,77 @@ abstract class FeedGenerator {
 			\Files::WriteToFile($filename_tmp, trim("$xml_head")."\n");
 		}
 
-		$count = $this->reader->getObjectsCount();
-
-		$offset = 0; $limit = 100;
+		$limit = 100;
 		$fixed_values = $this->options["fixed_values"];
 		$null_keys = array_keys(array_filter($fixed_values, "is_null"));
 		$xml_item_element_name = $this->options["xml_item_element_name"];
 		$is_cli = php_sapi_name() == "cli";
 		$write_header = true;
+		$processed = 0;
+		$xml_out = "";
 
-		while (
-			$objects = $this->reader->getObjects([
-				"offset" => $offset,
-				"limit" => $limit,
-			])
-		) {
+		foreach ($this->reader->iterateObjects() as $_object) {
+			$item_out = "";
 
-			$xml_out = "";
+			# get all product values in a universal format
+			# contains all values that may be needed for different feed types
+			$itemAr = $this->reader->objectToArray($_object,$_object_to_ar_options);
 
-			foreach($objects as $_object) {
-				$item_out = "";
+			# transform to the format required by the target service (feed),
+			# only a subset of values with service-specific key names is returned
+			$itemAr = $this->transformForService($itemAr);
 
-				# get all product values in a universal format
-				# contains all values that may be needed for different feed types
-				$itemAr = $this->reader->objectToArray($_object,$_object_to_ar_options);
-
-				# transform to the format required by the target service (feed),
-				# only a subset of values with service-specific key names is returned
-				$itemAr = $this->transformForService($itemAr);
-
-				# add fixed values that do not need to be fetched from the db, are the same for all items,
-				# or are specific to the given feed
-				array_walk($itemAr, function(&$item) use ($fixed_values) {
-					$item = $fixed_values + $item;
-				});
-				# keys in fixed_values containing value null will be removed from output
-				array_walk($itemAr, function(&$item) use ($null_keys) {
-					foreach($null_keys as $k) {
-						unset($item[$k]);
-					}
-				});
-
-				array_walk($itemAr, function(&$item) {
-					$item = $this->afterFilter($item);
-				});
-
-				array_walk($itemAr, "ksort");
-
-				switch($this->options["output_format"]) {
-				case "csv":
-					foreach($itemAr as $ar) {
-						foreach($ar as &$_a) {
-							if (is_array($_a)) {
-								$_a = join("\n", $_a);
-							}
-						}
-						$item_out .= $this->_array_to_csv($ar, $write_header);
-						$write_header = false;
-					}
-					break;
-				default:
-					$item_out = $this->_array_to_xml($itemAr, $xml_item_element_name);
-					break;
+			# add fixed values that do not need to be fetched from the db, are the same for all items,
+			# or are specific to the given feed
+			array_walk($itemAr, function(&$item) use ($fixed_values) {
+				$item = $fixed_values + $item;
+			});
+			# keys in fixed_values containing value null will be removed from output
+			array_walk($itemAr, function(&$item) use ($null_keys) {
+				foreach($null_keys as $k) {
+					unset($item[$k]);
 				}
-				$xml_out .= $item_out;
-			}
+			});
 
-			\Files::AppendToFile($filename_tmp,$xml_out);
+			array_walk($itemAr, function(&$item) {
+				$item = $this->afterFilter($item);
+			});
 
-			if ($is_cli) {
-				isset($_SERVER["TERM"]) && print(sprintf("processed %d records of %d\n", $offset+sizeof($objects), $count));
-			}
-			$offset += $limit;
-			if ($this->options["full_feed"]===false) {
-				print("\nDEVELOPMENT mode => we have enough => break\n\n");
+			array_walk($itemAr, "ksort");
+
+			switch($this->options["output_format"]) {
+			case "csv":
+				foreach($itemAr as $ar) {
+					foreach($ar as &$_a) {
+						if (is_array($_a)) {
+							$_a = join("\n", $_a);
+						}
+					}
+					$item_out .= $this->_array_to_csv($ar, $write_header);
+					$write_header = false;
+				}
+				break;
+			default:
+				$item_out = $this->_array_to_xml($itemAr, $xml_item_element_name);
 				break;
 			}
+			$xml_out .= $item_out;
+			$processed++;
+
+			if ($processed % $limit === 0) {
+				\Files::AppendToFile($filename_tmp, $xml_out);
+				$xml_out = "";
+				$is_cli && isset($_SERVER["TERM"]) && print(sprintf("processed %d records\n", $processed));
+				if ($this->options["full_feed"]===false) {
+					print("\nDEVELOPMENT mode => we have enough => break\n\n");
+					break;
+				}
+			}
+		}
+
+		if ($xml_out) {
+			\Files::AppendToFile($filename_tmp, $xml_out);
+			$is_cli && isset($_SERVER["TERM"]) && print(sprintf("processed %d records\n", $processed));
 		}
 		if ($output_format == "xml") {
 			$_feed_end = $this->generateXmlEnd();

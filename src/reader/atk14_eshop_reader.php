@@ -66,6 +66,10 @@ class Atk14EshopReader {
 
 		$this->lang = $options["lang"];
 		$this->price_finder = $options["price_finder"];
+		$this->region = \Region::GetRegionByCode($options["region"]);
+
+		$_image_url_options = array_filter([$options["image_geometry"], $options["image_watermark"]]);
+		$this->imageUrlOptions = join(",", $_image_url_options);
 
 		$this->options = $options;
 	}
@@ -180,6 +184,55 @@ class Atk14EshopReader {
 		return \Cache::Get("Card",$this->getObjectIds($options));
 	}
 
+	/**
+	 * Generátor procházející všechny karty po dávkách pomocí iterateRows().
+	 * Nevyžaduje předchozí zjištění celkového počtu ani načítání všech ID do paměti.
+	 *
+	 * @return \Generator|Card[]
+	 */
+	function iterateObjects($options=[]) {
+		$options += [
+			"batch_size" => 100,
+		];
+
+		$conditions = $this->_getConditions();
+		$bindAr = [
+			":exclude_tag_id" => $this->excludeTag,
+		];
+		if (!is_null($this->idsToIgnore)) {
+			$bindAr[":ids_to_ignore"] = $this->idsToIgnore;
+		}
+		$conditions = join(" AND ", array_map(function($x) {
+			return "({$x})";
+		}, $conditions));
+
+		$batch = [];
+		foreach ($this->dbmole->iterateRows(
+			"SELECT distinct(id) FROM cards
+			WHERE {$conditions}
+			ORDER BY id",
+			$bindAr
+		) as $row) {
+			$batch[] = $row["id"];
+			if (count($batch) >= $options["batch_size"]) {
+				\Cache::Clear("Card");
+				\Cache::Prepare("Card", $batch);
+				foreach (\Cache::Get("Card", $batch) as $card) {
+					yield $card;
+				}
+				$batch = [];
+			}
+		}
+
+		if ($batch) {
+			\Cache::Clear("Card");
+			\Cache::Prepare("Card", $batch);
+			foreach (\Cache::Get("Card", $batch) as $card) {
+				yield $card;
+			}
+		}
+	}
+
 	function objectToArray($card,$options=array()) {
 		$options += [];
 		$products_ar = [];
@@ -243,17 +296,18 @@ class Atk14EshopReader {
 	protected function prepareProductPriceData(\Product $object, &$item_data) {
 		$_unit = $object->getUnit();
 		$_currency = $this->price_finder->getCurrency();
+		$_decimals = $_currency->getDecimalsSummary();
 
 		$_product_price = $this->price_finder->getPrice($object, (int)$_unit->getDisplayUnitMultiplier());
 
 		$_price_with_currency = $this->options["price_with_currency"];
 
 		# zakladni cena pred slevou
-		$_product_price && ($item_data[static::ELEMENT_KEY_BASEPRICE_VAT] = number_format(round($_product_price->getPriceBeforeDiscountInclVat(),$_currency->getDecimalsSummary()),$_currency->getDecimalsSummary(),".",""));
+		$_product_price && ($item_data[static::ELEMENT_KEY_BASEPRICE_VAT] = number_format(round($_product_price->getPriceBeforeDiscountInclVat(),$_decimals),$_decimals,".",""));
 		$_product_price && ($_price_with_currency===true) && ($item_data[static::ELEMENT_KEY_BASEPRICE_VAT] .= sprintf(" %s",$_currency->getCode()));
 
 		# aktualni, konecna cena
-		$_product_price && ($item_data[static::ELEMENT_KEY_SALEPRICE_VAT] = number_format(round($_product_price->getPriceInclVat(),$_currency->getDecimalsSummary()),$_currency->getDecimalsSummary(),".",""));
+		$_product_price && ($item_data[static::ELEMENT_KEY_SALEPRICE_VAT] = number_format(round($_product_price->getPriceInclVat(),$_decimals),$_decimals,".",""));
 		$_product_price && ($_price_with_currency===true) && ($item_data[static::ELEMENT_KEY_SALEPRICE_VAT] .= sprintf(" %s",$_currency->getCode()));
 
 		$_product_price && $item_data[static::ELEMENT_KEY_PRICE_IS_DISCOUNTED] = $_product_price->discounted();
@@ -291,8 +345,7 @@ class Atk14EshopReader {
 		$item_attrs[static::ELEMENT_KEY_UNIT] = $_unit->getUnit();
 		$item_attrs[static::ELEMENT_KEY_UNIT_PRICING_BASE_MEASURE] = sprintf("%s %s", "1", $_unit->getDisplayUnit());
 		$item_attrs[static::ELEMENT_KEY_STOCKCOUNT] = $product->getStockcount();
-		$_region = \Region::GetRegionByCode($this->options["region"]);
-		$item_attrs[static::ELEMENT_KEY_AVAILABILITY] = $product->canBeOrdered(["region" => $_region]);
+		$item_attrs[static::ELEMENT_KEY_AVAILABILITY] = $product->canBeOrdered(["region" => $this->region]);
 
 		$this->prepareProductPriceData($product, $item_attrs);
 
@@ -300,14 +353,8 @@ class Atk14EshopReader {
 		$product_ean = $product->hasKey("ean") ? $product->g("ean") : null;
 
 		if ($_image) {
-			$_url_options = [
-				$this->options["image_geometry"],
-				$this->options["image_watermark"],
-			];
-			$_url_options = array_filter($_url_options);
-			$_url_options = join(",", $_url_options);
 			$_ppq = new \Pupiq($_image->getUrl());
-			$_image = $_ppq->getUrl($_url_options);
+			$_image = $_ppq->getUrl($this->imageUrlOptions);
 		}
 
 		$item_attrs[static::ELEMENT_KEY_CATALOG_ID] = $product->getCatalogId();
