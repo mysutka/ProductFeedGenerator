@@ -58,7 +58,14 @@ class ProductFeedGeneratorRobot extends ApplicationRobot {
 		$known_feeds = array_keys($feeds_config);
 
 		while($prm = array_shift($argv)) {
-			$todo_feeds[] = $prm;
+			switch($prm) {
+			case "-ff":
+				$this->options["full_feed"] = true;
+				break;
+			default:
+				$todo_feeds[] = $prm;
+				break;
+			}
 		}
 
 		if ($todo_feeds && !array_intersect($known_feeds, $todo_feeds)) {
@@ -79,7 +86,7 @@ class ProductFeedGeneratorRobot extends ApplicationRobot {
 			if (!isset($feeds_config[$feed_name])) { continue; }
 			$config = $feeds_config[$feed_name];
 			$class = $config["class"];
-			$options = array_merge(["logger" => $this->logger], $config["options"] ?? []);
+			$options = array_merge(["full_feed" => $this->options["full_feed"] ?? null, "logger" => $this->logger], $config["options"] ?? []);
 			$generator = new $class($reader, $options);
 			$generator->exportTo($ATK14_GLOBAL->getPublicRoot().$config["output"]);
 		}
