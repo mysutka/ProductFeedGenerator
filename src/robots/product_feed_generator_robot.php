@@ -4,6 +4,8 @@
  */
 class ProductFeedGeneratorRobot extends ApplicationRobot {
 
+	protected $options = [];
+
 	function run() {
 		global $ATK14_GLOBAL;
 		global $argv;
@@ -11,6 +13,11 @@ class ProductFeedGeneratorRobot extends ApplicationRobot {
 		$reader = null;
 		array_shift($argv);
 		array_shift($argv);
+
+		$this->options = [
+			"full_feed" => null,
+			"logger" => $this->logger,
+		];
 
 		$todo_feeds = [];
 
@@ -86,7 +93,7 @@ class ProductFeedGeneratorRobot extends ApplicationRobot {
 			if (!isset($feeds_config[$feed_name])) { continue; }
 			$config = $feeds_config[$feed_name];
 			$class = $config["class"];
-			$options = array_merge(["full_feed" => $this->options["full_feed"] ?? null, "logger" => $this->logger], $config["options"] ?? []);
+			$options = array_merge($this->options, $config["options"] ?? []);
 			$generator = new $class($reader, $options);
 			$generator->exportTo($ATK14_GLOBAL->getPublicRoot().$config["output"]);
 		}
