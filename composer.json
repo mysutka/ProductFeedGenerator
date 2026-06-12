@@ -22,9 +22,9 @@
 		"phpunit/phpunit": "~6"
 	},
 	"autoload": {
-		"classmap": ["src"]
+		"classmap": ["src/feed_generator.php", "src/generator", "src/reader"]
 	},
 	"autoload-dev": {
-		"classmap": ["src", "test"]
+		"classmap": ["src/feed_generator.php", "src/generator", "src/reader", "test"]
 	}
 }
