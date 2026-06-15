@@ -235,7 +235,7 @@ class Atk14EshopReader {
 			$categories = array_slice($categories, 0, (int)$categories_limit);
 		}
 		if ($this->options["merge_multiple_categories"]===true) {
-			$categories = [implode(", ", $categories)];
+			$categories = implode(", ", $categories);
 		}
 		return $categories;
 	}
