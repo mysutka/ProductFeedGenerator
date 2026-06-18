@@ -243,14 +243,25 @@ class Atk14EshopReader {
 	protected function prepareProductPriceData(\Product $object, &$item_data) {
 		$_unit = $object->getUnit();
 		$_currency = $this->price_finder->getCurrency();
+		$_amount = (int)$_unit->getDisplayUnitMultiplier();
 
-		$_product_price = $this->price_finder->getPrice($object, (int)$_unit->getDisplayUnitMultiplier());
+		$_product_price = $this->price_finder->getPrice($object, $_amount);
 
 		$_price_with_currency = $this->options["price_with_currency"];
 
-		# zakladni cena pred slevou
-		$_product_price && ($item_data[static::ELEMENT_KEY_BASEPRICE_VAT] = number_format(round($_product_price->getPriceBeforeDiscountInclVat(),$_currency->getDecimalsSummary()),$_currency->getDecimalsSummary(),".",""));
-		$_product_price && ($_price_with_currency===true) && ($item_data[static::ELEMENT_KEY_BASEPRICE_VAT] .= sprintf(" %s",$_currency->getCode()));
+		# zakladni cena pred slevou:
+		# - pokud je produkt zlevnen (casova sleva), pouzije se getPriceBeforeDiscountInclVat()
+		# - pokud neni zlevnen, ale existuje doporucena (base) cena vyssi nez aktualni, pouzije se ta
+		if ($_product_price) {
+			if ($_product_price->discounted()) {
+				$_baseprice_vat = $_product_price->getPriceBeforeDiscountInclVat();
+			} else {
+				$_base_price = $this->price_finder->getBasePrice($object, $_amount);
+				$_baseprice_vat = $_base_price ? $_base_price->getPriceInclVat() : $_product_price->getPriceInclVat();
+			}
+			$item_data[static::ELEMENT_KEY_BASEPRICE_VAT] = number_format(round($_baseprice_vat, $_currency->getDecimalsSummary()), $_currency->getDecimalsSummary(), ".", "");
+			$_price_with_currency === true && ($item_data[static::ELEMENT_KEY_BASEPRICE_VAT] .= sprintf(" %s", $_currency->getCode()));
+		}
 
 		# aktualni, konecna cena
 		$_product_price && ($item_data[static::ELEMENT_KEY_SALEPRICE_VAT] = number_format(round($_product_price->getPriceInclVat(),$_currency->getDecimalsSummary()),$_currency->getDecimalsSummary(),".",""));
