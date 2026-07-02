@@ -291,7 +291,8 @@ class Atk14EshopReader {
 	 * Vyplneni atributu spolecnych pro vsechny vyhledavace.
 	 */
 	function itemToArray(\Product $product) {
-		if (is_null($this->price_finder->getPrice($product))) {
+		$_price_check = $this->price_finder->getPrice($product);
+		if (is_null($_price_check) || (float)$_price_check->getPriceInclVat() <= 0) {
 			return null;
 		}
 		$_image = $product->getImage();
