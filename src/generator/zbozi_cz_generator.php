@@ -2,6 +2,8 @@
 namespace ProductFeedGenerator\Generator;
 use ProductFeedGenerator\FeedGenerator;
 
+use ProductFeedGenerator\Reader\Atk14EshopReader;
+
 class ZboziCzGenerator extends FeedGenerator {
 
 	function __construct($reader, $options=[]) {
@@ -11,7 +13,6 @@ class ZboziCzGenerator extends FeedGenerator {
 			"feed_begin" => '<SHOP xmlns="http://www.zbozi.cz/ns/offer/1.0">',
 			"feed_end" => "</SHOP>",
 			"fixed_values" => [
-				"DELIVERY_DATE" => 0,
 			],
 		];
 		return parent::__construct($reader, $options);
@@ -31,6 +32,20 @@ class ZboziCzGenerator extends FeedGenerator {
 
 			"PRICE_VAT" => "PRICE_VAT",
 			"LIST_PRICE" => "BASEPRICE_VAT",
+
+			"STOCKCOUNT" => "STOCKCOUNT",
 		];
+	}
+
+	function afterFilter($values) {
+		if (!isset($this->options["fixed_values"]["DELIVERY_DATE"])) {
+			if ($values[Atk14EshopReader::ELEMENT_KEY_STOCKCOUNT]===0) {
+				$values["DELIVERY_DATE"] = "";
+			} else {
+				$values["DELIVERY_DATE"] = "0";
+			}
+		}
+		unset($values[Atk14EshopReader::ELEMENT_KEY_STOCKCOUNT]);
+		return $values;
 	}
 }

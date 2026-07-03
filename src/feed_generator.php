@@ -173,7 +173,7 @@ abstract class FeedGenerator {
 			$_feed_title = $this->_array_to_xml(["title" => $this->options["feed_title"]]);
 		}
 		if (isset($this->options["eshop_url"])) {
-			$_eshop_url = sprintf("<link rel=\"self\" href=\"https://%s\" />\n", $this->options["eshop_url"]);
+			$_eshop_url = sprintf("<link rel=\"self\" href=\"https://%s\" />\n", htmlspecialchars($this->options["eshop_url"]));
 		}
 
 		$_begin = array_filter([
