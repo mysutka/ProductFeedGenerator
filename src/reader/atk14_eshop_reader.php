@@ -194,20 +194,22 @@ class Atk14EshopReader {
 		$_description = $this->prepareDescription($card);
 		$_card_id = $card->getId();
 		$_card_name = $card->getName($this->lang);
-		$_product_url = $this->_buildCardLink($card, $options);
+		$_has_variants = $card->hasVariants();
+		$_products = $card->getProducts($card_options);
+		$_use_product_in_url = $_has_variants && count($_products) > 1;
 
-		foreach($card->getProducts($card_options) as $p) {
+		foreach($_products as $p) {
 			$p_ar = $this->itemToArray($p);
 			if (!$p_ar) {
 				continue;
 			}
-			if (!$card->hasVariants()) {
-			$p_ar[static::ELEMENT_KEY_PRODUCT_NAME] = $_card_name;
+			if (!$_has_variants) {
+				$p_ar[static::ELEMENT_KEY_PRODUCT_NAME] = $_card_name;
 			}
 			$p_ar[static::ELEMENT_KEY_CATEGORIES] = $_categories;
 			$p_ar[static::ELEMENT_KEY_DESCRIPTION] = $_description;
 			$p_ar[static::ELEMENT_KEY_GROUP_ID] = $_card_id;
-			$p_ar[static::ELEMENT_KEY_URL] = $_product_url;
+			$p_ar[static::ELEMENT_KEY_URL] = $this->_buildCardLink($card, $_use_product_in_url ? $p : null, $options);
 			$_brand && ($p_ar[static::ELEMENT_KEY_MANUFACTURER] = $_brand);
 			$products_ar[] = $p_ar;
 		}
@@ -333,7 +335,7 @@ class Atk14EshopReader {
 		return $item_attrs;
 	}
 
-	function _buildCardLink($card, $options=[]) {
+	function _buildCardLink($card, $product=null, $options=[]) {
 		$options += array(
 			"additional_url_params" => [],
 		);
@@ -344,6 +346,9 @@ class Atk14EshopReader {
 			"id" => $card,
 			"lang" => $this->lang,
 		);
+		if ($product) {
+			$_url_params["product_id"] = $product;
+		}
 		$_url_params += $options["additional_url_params"];
 		$_url_options = array(
 			"with_hostname" => true,
