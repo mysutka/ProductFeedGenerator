@@ -84,6 +84,7 @@ class Atk14EshopReader {
 			"lang" => null,
 			"category_path_connector" => ">",
 			"merge_multiple_categories" => false,
+			"multiple_categories_connector" => ", ",
 			"hostname" => null,
 			"image_geometry" => "800x800",
 			"image_watermark" => null,
@@ -236,7 +237,7 @@ class Atk14EshopReader {
 			$categories = array_slice($categories, 0, (int)$categories_limit);
 		}
 		if ($this->options["merge_multiple_categories"]===true) {
-			$categories = implode(", ", $categories);
+			$categories = implode($this->options["multiple_categories_connector"], $categories);
 		}
 		return $categories;
 	}
