@@ -89,6 +89,7 @@ class ProductFeedGeneratorRobot extends ApplicationRobot {
 			$todo_feeds = $known_feeds;
 		}
 
+		Files::Mkdir($ATK14_GLOBAL->getPublicRoot()."/product_feeds");
 		foreach ($todo_feeds as $feed_name) {
 			if (!isset($feeds_config[$feed_name])) { continue; }
 			$config = $feeds_config[$feed_name];
