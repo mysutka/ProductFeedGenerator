@@ -33,7 +33,7 @@ class Atk14EshopReader {
 		$this->markdown = $this->_getMarkdown();
 		$this->dbmole = \PgMole::GetInstance();
 
-		$this->buildDefaultOptions();
+		$this->buildDefaultOptions($constructor_options);
 		$this->generator_options = [];
 		$this->constructor_options = $constructor_options;
 		$this->live_options = [];
